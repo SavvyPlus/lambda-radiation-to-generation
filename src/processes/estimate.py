@@ -28,9 +28,10 @@ def run_estimation(radiation_df, capacity, r_type):
     dt = load_irrad_csv(radiation_df)
     # print(len(dt), 66457)    # 66457
     # fill missing data
-    start_yr = dt.loc[0, 'year']
+    dt = dt.reset_index()
+    start_yr = dt.iloc[0]['year']
 
-    end_yr = dt.loc[len(dt)-1, 'year']
+    end_yr = dt.iloc[len(dt)-1]['year']
     # print(start_yr, end_yr)
     calc_missing(dt, 'GHI')
     calc_missing(dt, 'DNI')
@@ -158,9 +159,9 @@ def calc_missing(df, r_type):
     # df.apply(lambda x: print(x) if math.isnan(x[column_name]) else 1+1, axis=1)
     for i in df.index:
         if math.isnan(df.loc[i, column_name]) or df.loc[i, column_name] == -999:
-            if i == 0:
-                df.loc[i, column_name] = 0
-                continue
+            # if i == 0:
+            #     df.loc[i, column_name] = 0
+            #     continue
             start = df.loc[i-1, column_name]
             end = 0
             avg = 0
