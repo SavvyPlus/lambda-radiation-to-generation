@@ -18,7 +18,7 @@ def write_to_s3(df, bucket, team_id, email, query_id):
     :type query_id: str
     """
     csv_buffer = StringIO()
-    df.to_csv(csv_buffer)
+    df.to_csv(csv_buffer, index=False)
     s3_resource = boto3.resource('s3')
     key = 'TID' + team_id + '/' + email + '/' + query_id + '.csv'
     s3_resource.Object(bucket, key).put(Body=csv_buffer.getvalue())

@@ -13,16 +13,17 @@ def lambda_handler(event, context):
     # print(event['query_id'])
     # received_data = {'data': 'first test'}
     # received_data = ast.literal_eval(event['body'])
+    time1 = time.time()
+    start_date = datetime.datetime.strptime(event['start_date'], '%Y-%m-%d')
+    end_date = datetime.datetime.strptime(event['end_date'], '%Y-%m-%d')
+    lat = event['lat']
+    lng = event['lng']
 
-    start_date = datetime.datetime(2018, 7, 1)
-    end_date = datetime.datetime(2019, 7, 1)
-    lat = -10.4280875
-    lng = 113.5748624
     df_dni, df_ghi = get_radiation_data(lat, lng, start_date, end_date)
     complete_df = combine_hourly_radiation(df_dni, df_ghi)
     result_df = run_estimation(complete_df, 0.005, 'Tracking')
-    write_to_s3(result_df, 'colin-query-test', '10', 'abc-test@gmail.com', '123cwwc-2vvee2')
-
+    write_to_s3(result_df, event['bucket'], event['team_id'], event['email'], event['query_id'])
+    print(time.time() - time1)
     return {
         'statusCode': 200,
         'body': json.dumps('success')
@@ -30,6 +31,14 @@ def lambda_handler(event, context):
 
 
 if __name__ == "__main__":
-    lambda_handler(1, 2)
+    lambda_handler({'query_id': 'fe3fcb94-bbda-4e97-ac4d-e5d6fcb2bb05',
+                    'start_date': '2018-7-1',
+                    'end_date': '2019-7-1',
+                    'lat': -37.8255667,
+                    'lng': 144.9719736,
+                    'bucket': 'colin-query-test',
+                    'team_id': '10',
+                    'email': 'abc-test@gmail.com',
+                    }, 2)
 
 

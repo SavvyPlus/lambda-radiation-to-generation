@@ -51,6 +51,7 @@ def run_estimation(radiation_df, capacity, r_type):
     # print(len(dt), 31503)    # 31503
 
     # compute the time difference in days between each day to the day with longest daylight in that year
+    dt = dt.drop(['GHI', 'DNI'], axis=1)
     dt = dt.dropna()   # 31177
     get_time_diff(dt, start_yr, end_yr)
     # print(dt)
@@ -107,6 +108,8 @@ def run_estimation(radiation_df, capacity, r_type):
 
     dt = (pd.concat([dt_all, dt_hh], sort=False))
     dt = dt[['TimeStamp', 'DNI_filled', 'GHI_filled', 'predictions_final']].copy()
+    dt['predictions_final'] = dt['predictions_final'] * 1000000
+    dt = dt.rename(columns={'DNI_filled': 'DNI', 'GHI_filled': 'GHI', 'predictions_final': 'estimate output(W)'})
     dt = dt.sort_values(by=['TimeStamp'])
     # print(dt)
     start_time = (dt.iloc[0])['TimeStamp'].date()
@@ -153,7 +156,7 @@ def calc_missing(df, r_type):
     """
     column_name = r_type + '_filled'
     # df.apply(lambda x: print(x) if math.isnan(x[r_type]) else 1 + 1, axis=1)
-    df[r_type] = df.apply(lambda x: 0 if math.isnan(x[r_type]) and x['hour_diff'] >=7 else x[r_type], axis=1)
+    df[r_type] = df.apply(lambda x: 0 if math.isnan(float(x[r_type])) and x['hour_diff'] >=7 else float(x[r_type]), axis=1)
     df[column_name] = pd.Series([None]*len(df[r_type]), index=df.index)
     df[column_name] = df[r_type].map(lambda x: x if (x >= 0 or not math.isnan(x)) else None)
     # df.apply(lambda x: print(x) if math.isnan(x[column_name]) else 1+1, axis=1)
