@@ -109,7 +109,7 @@ def run_estimation(radiation_df, capacity, r_type):
     dt = (pd.concat([dt_all, dt_hh], sort=False))
     dt = dt[['TimeStamp', 'DNI_filled', 'GHI_filled', 'predictions_final']].copy()
     dt['predictions_final'] = dt['predictions_final'] * 1000000
-    dt = dt.rename(columns={'DNI_filled': 'DNI', 'GHI_filled': 'GHI', 'predictions_final': 'estimate output(W)'})
+    dt = dt.rename(columns={'DNI_filled': 'DNI', 'GHI_filled': 'GHI', 'predictions_final': 'Estimate output(W)'})
     dt = dt.sort_values(by=['TimeStamp'])
     # print(dt)
     start_time = (dt.iloc[0])['TimeStamp'].date()
@@ -118,7 +118,7 @@ def run_estimation(radiation_df, capacity, r_type):
     # print(end_time)
     dt_datetime_series = pd.date_range(start=start_time, end=end_time, freq='30min')
     # print(dt_datetime_series)
-    dt_final = pd.DataFrame(dt_datetime_series, columns=['TimeStamp'])
+    dt_final = pd.DataFrame(dt_datetime_series, columns=['TimeStamp'], index=dt_datetime_series)
     dt.reset_index(drop=True, inplace=True)
     dt_final = dt_final.merge(dt, how='outer', on=['TimeStamp'])
     dt_final = dt_final.fillna(value=0)
@@ -156,7 +156,7 @@ def calc_missing(df, r_type):
     """
     column_name = r_type + '_filled'
     # df.apply(lambda x: print(x) if math.isnan(x[r_type]) else 1 + 1, axis=1)
-    df[r_type] = df[r_type].astype(float)
+    df[r_type] = pd.to_numeric(df[r_type], errors='coerce')
     df[r_type] = df.apply(lambda x: 0 if math.isnan(x[r_type]) and x['hour_diff'] >=7 else x[r_type], axis=1)
     df[column_name] = pd.Series([None]*len(df[r_type]), index=df.index)
     df[column_name] = df[r_type].map(lambda x: x if (x >= 0 or not math.isnan(x)) else None)
