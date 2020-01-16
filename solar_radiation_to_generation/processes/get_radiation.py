@@ -24,9 +24,11 @@ def get_radiation_data(lat, lng, start_date, end_date):
 
     result = get_radiation(nearest, 'dni', start_date, end_date)
     df_dni = pd.DataFrame(result, columns=['TimeStamp', 'radiation'])
+    df_dni['TimeStamp'] = pd.to_datetime(df_dni['TimeStamp'], format="%Y-%m-%d %H:%M")
 
     result = get_radiation(nearest, 'ghi', start_date, end_date)
     df_ghi = pd.DataFrame(result, columns=['TimeStamp', 'radiation'])
+    df_ghi['TimeStamp'] = pd.to_datetime(df_ghi['TimeStamp'], format="%Y-%m-%d %H:%M")
 
     return df_dni, df_ghi
 

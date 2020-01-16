@@ -2,8 +2,8 @@ import pandas as pd
 import datetime
 import math
 
-from src.processes.TrackingModel import tracking
-from src.processes.NonTrackingModel import non_tracking as nontracking
+from solar_radiation_to_generation.processes.TrackingModel import tracking
+from solar_radiation_to_generation.processes.NonTrackingModel import non_tracking as nontracking
 
 TRACKING_CAPACITY = 56
 NON_TRACKING_CAPACITY = 102
@@ -133,7 +133,7 @@ def load_irrad_csv(radiation_df):
     :type radiation_df: pd.DataFrame
     """
     dataframe = radiation_df
-    dataframe['TimeStamp'] = pd.to_datetime(dataframe['TimeStamp'], format="%d/%m/%Y %H:%M")
+    # dataframe['TimeStamp'] = pd.to_datetime(dataframe['TimeStamp'], format="%d/%m/%Y %H:%M")
     # print(type(dataframe['TimeStamp']))
     dataframe['month'] = dataframe['TimeStamp'].dt.month
     dataframe['year'] = dataframe['TimeStamp'].dt.year
@@ -156,7 +156,8 @@ def calc_missing(df, r_type):
     """
     column_name = r_type + '_filled'
     # df.apply(lambda x: print(x) if math.isnan(x[r_type]) else 1 + 1, axis=1)
-    df[r_type] = df.apply(lambda x: 0 if math.isnan(float(x[r_type])) and x['hour_diff'] >=7 else float(x[r_type]), axis=1)
+    df[r_type] = df[r_type].astype(float)
+    df[r_type] = df.apply(lambda x: 0 if math.isnan(x[r_type]) and x['hour_diff'] >=7 else x[r_type], axis=1)
     df[column_name] = pd.Series([None]*len(df[r_type]), index=df.index)
     df[column_name] = df[r_type].map(lambda x: x if (x >= 0 or not math.isnan(x)) else None)
     # df.apply(lambda x: print(x) if math.isnan(x[column_name]) else 1+1, axis=1)

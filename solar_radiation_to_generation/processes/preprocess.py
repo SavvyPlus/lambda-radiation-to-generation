@@ -25,7 +25,7 @@ def combine_hourly_radiation(df_dni, df_ghi):
     cols = cols[-1:] + cols[:-1]
     combined_df = combined_df[cols]
     # convert Timestamp to datetime
-    combined_df['TimeStamp'] = combined_df['TimeStamp'].dt.strftime('%d/%m/%Y %H:%M')
+    # combined_df['TimeStamp'] = combined_df['TimeStamp'].dt.strftime('%d/%m/%Y %H:%M')
     combined_df.fillna(0)
 
     print('finished pre process')
