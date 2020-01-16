@@ -23,20 +23,18 @@ def lambda_handler(event, context):
     lat = event['lat']
     lng = event['lng']
 
-    # df_dni, df_ghi = get_radiation_data(lat, lng, start_date, end_date)
-    # complete_df = combine_hourly_radiation(df_dni, df_ghi)
+    df_dni, df_ghi = get_radiation_data(lat, lng, start_date, end_date)
+    complete_df = combine_hourly_radiation(df_dni, df_ghi)
     # complete_df.to_csv('df.csv',index=False)
-    complete_df = pd.read_csv('df.csv', parse_dates=['TimeStamp'])
+    # complete_df = pd.read_csv('df.csv', parse_dates=['TimeStamp'])
 
 
     df_for_estimation = complete_df[complete_df['TimeStamp'] > estimation_start_date].copy()
     result_df = run_estimation(df_for_estimation, 0.005, 'Tracking')
-    # result_df = result_df.set_index('TimeStamp')
-    complete_df['Estimate output(W)'] = None
-    complete_df.update(result_df)
-    complete_df.to_csv('result.csv', index=False)
-    # result_df.update(complete_df, join='left')
-    # result_df = complete_df.merge(result_df, how='outer', on=['TimeStamp'])
+
+    result_df = result_df.drop(columns=['DNI', 'GHI'])
+    result_df = complete_df.merge(result_df, how='left', on=['TimeStamp'])
+
 
     # write_to_s3(result_df, event['bucket'], event['team_id'], event['email'], event['query_id'])
     print(time.time() - time1)
