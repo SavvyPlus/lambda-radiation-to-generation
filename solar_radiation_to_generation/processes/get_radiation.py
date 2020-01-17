@@ -57,8 +57,9 @@ def get_radiation(coordinates, r_type, start_date, end_date):
                         FROM solar_radiation_hill.lat_partition_v2
                         WHERE (latitude = '{str(format(lat, '.7f'))}'
                         AND longitude = '{str(format(lng, '.7f'))}' )
-                        AND cast(year as integer) >= {start_year}
-                        AND cast(year as integer) <= {end_year}
+                        AND (CAST(year AS BIGINT)*10000 + CAST(month AS BIGINT)*100 + day)
+                        BETWEEN {start_date.year*10000 + start_date.month*100 + start_date.day}
+                        AND {end_date.year*10000 + end_date.month*100 + end_date.day}
                         AND radiationtype='{r_type}'
                         ORDER BY date'''
     # print(query_string)
