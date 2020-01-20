@@ -38,9 +38,8 @@ def lambda_handler(event, context):
     result_df = complete_df.merge(result_df, how='left', on=['TimeStamp'])
 
     grouped_df = group_data(result_df, event['resolution'])
-    grouped_df = grouped_df.fillna('N/A')
-    grouped_df.to_csv('group.csv')
 
+    grouped_df.to_csv('group.csv')
     # write_to_s3(result_df, event['bucket'], event['team_id'], event['email'], event['query_id'])
     print(time.time() - time1)
     return {
