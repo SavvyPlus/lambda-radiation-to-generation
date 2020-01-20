@@ -4,7 +4,7 @@ import boto3
 
 def write_to_s3(df, bucket, team_id, email, query_id):
     """
-    Write a dataframe to s3 under the path TID/email/query_id.csv
+    Write the dataframe to S3 under the path bucket/TID/email/query_id.csv
 
     :param df: the dataframe that is about to be written
     :type df: pd.DataFrame
