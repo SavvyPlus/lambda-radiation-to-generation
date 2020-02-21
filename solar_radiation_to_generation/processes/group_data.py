@@ -37,4 +37,6 @@ def group_data(result_df, resolution):
         grouped_df = grouped_df.drop(columns=['Month', 'Day', 'WeekNo'])
 
     grouped_df = grouped_df.fillna('N/A')
+    # Reverse the whole data order so users won't see 'N/A' generation at the beginning
+    grouped_df = grouped_df.iloc[::-1]
     return grouped_df
