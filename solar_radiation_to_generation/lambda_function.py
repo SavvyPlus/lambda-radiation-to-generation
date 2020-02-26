@@ -26,7 +26,7 @@ def lambda_handler(event, context):
     lat = event['lat']
     lng = event['lng']
 
-    generation = True if event['generation'] == 1 else 0
+    generation = True if event['generation'] == 1 else False
 
     # df_dni, df_ghi = get_radiation_data(lat, lng, start_date, end_date)
     # complete_df = combine_hourly_radiation(df_dni, df_ghi)
@@ -63,7 +63,7 @@ if __name__ == "__main__":
                     'team_id': '10',
                     'email': 'abc-test@gmail.com',
                     'resolution': 'monthly',
-                    'generation': 0,
+                    'generation': 1,
                     'capacity': 5}, 2)
 
 
