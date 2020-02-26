@@ -47,7 +47,7 @@ def run_estimation(radiation_df, capacity, r_type):
 
     half_hour = dt
     # filter the time with no sunshine
-    dt = dt[~dt.GHI_filled.isin([0]) | ~dt.DNI_filled.isin([0])]
+    # dt = dt[~dt.GHI_filled.isin([0]) | ~dt.DNI_filled.isin([0])]
     # print(len(dt), 31503)    # 31503
 
     # compute the time difference in days between each day to the day with longest daylight in that year
@@ -55,6 +55,13 @@ def run_estimation(radiation_df, capacity, r_type):
     dt = dt.dropna()   # 31177
     get_time_diff(dt, start_yr, end_yr)
     # print(dt)
+
+    # Remove for 0
+    dt['Act_GHI_pred'] = dt.apply(lambda x: 0 if x['GHI_filled'] == 0 and x['DNI_filled'] == 0 else x['GHI_filled'],
+                                  axis=1)
+    dt['Act_DNI_pred'] = dt.apply(lambda x: 0 if x['GHI_filled'] == 0 and x['DNI_filled'] == 0 else x['DNI_filled'],
+                                  axis=1)
+
 
     # calculate the lags and leads for the Actual_hh_predicted
     dt['Act_GHI_pred_lag'] = dt['Act_GHI_pred'].shift(1)
@@ -67,14 +74,19 @@ def run_estimation(radiation_df, capacity, r_type):
     # print(dt['Act_DNI_pred_lead'])
 
     # print(len(dt), 31177)
-    dt = dt.dropna()
+    # remove first line
+    dt = dt.iloc[1:]
     # print(len(dt), 31175)  # 31175
 
     #  get the winter month
     dt_winter = model.calc_tracking_winter(dt, scalar, half_hour=False)
+    dt_winter['prediction_final'] = dt_winter.apply(lambda x: 0 if x['GHI_filled']==0 and x['DNI_filled']==0
+                                                    else x['prediction_final'], axis=1)
     # print(dt_winter)
 
     dt_summer = model.calc_tracking_summer(dt, scalar, half_hour=False)
+    dt_summer['prediction_final'] = dt_summer.apply(lambda x: 0 if x['GHI_filled']==0 and x['DNI_filled']==0
+                                                    else x['prediction_final'], axis=1)
     # print(dt_summer)
 
     dt_all = pd.concat([dt_winter, dt_summer])
@@ -86,11 +98,15 @@ def run_estimation(radiation_df, capacity, r_type):
     compute_predict(hh, dni_predict, 'DNI')
     # print(hh)
 
-    hh = hh[hh['GHI_filled'] != 0]
-    hh = hh[hh['DNI_filled'] != 0]
-    hh = hh.dropna()
+    # hh = hh[hh['GHI_filled'] != 0]
+    # hh = hh[hh['DNI_filled'] != 0]
+    # hh = hh.dropna()
     get_time_diff(hh, start_yr, end_yr)
 
+    hh['Act_GHI_pred'] = hh.apply(lambda x: 0 if x['GHI_filled'] == 0 and x['DNI_filled'] == 0 else x['GHI_filled'],
+                                  axis=1)
+    hh['Act_DNI_pred'] = hh.apply(lambda x: 0 if x['GHI_filled'] == 0 and x['DNI_filled'] == 0 else x['DNI_filled'],
+                                  axis=1)
     # calculate the lags and leads for the Actual_hh_predicted
     hh['Act_GHI_pred_lag'] = hh['Act_GHI_pred'].shift(1)
     # print(dt['Act_GHI_pred_lag'])
@@ -100,9 +116,14 @@ def run_estimation(radiation_df, capacity, r_type):
     # print(dt['Act_DNI_pred_lag'])
     hh['Act_DNI_pred_lead'] = hh['Act_DNI_pred'].shift(-1)
     # print(dt['Act_DNI_pred_lead'])
-    hh_winter = model.calc_tracking_winter(hh, scalar, half_hour=True)
-    hh_summer = model.calc_tracking_summer(hh, scalar, half_hour=True)
+    hh = hh.iloc[1:]
 
+    hh_winter = model.calc_tracking_winter(hh, scalar, half_hour=True)
+    hh_winter['prediction_final'] = hh_winter.apply(lambda x: 0 if x['GHI_filled']==0 and x['DNI_filled']==0
+                                                    else x['prediction_final'], axis=1)
+    hh_summer = model.calc_tracking_summer(hh, scalar, half_hour=True)
+    hh_winter['prediction_final'] = hh_winter.apply(lambda x: 0 if x['GHI_filled']==0 and x['DNI_filled']==0
+                                                    else x['prediction_final'], axis=1)
     dt_hh = pd.concat([hh_winter, hh_summer])
     # print(dt_hh)
 
@@ -111,17 +132,17 @@ def run_estimation(radiation_df, capacity, r_type):
     dt['predictions_final'] = dt['predictions_final'] * 1000
     dt = dt.rename(columns={'DNI_filled': 'DNI', 'GHI_filled': 'GHI', 'predictions_final': 'Estimate generation(kW)'})
     dt = dt.sort_values(by=['TimeStamp'])
-    # print(dt)
-    start_time = (dt.iloc[0])['TimeStamp'].date()
-    # print(start_time)
-    end_time = ((dt.iloc[len(dt)-1])['TimeStamp'] + pd.Timedelta(days=1)).date()
-    # print(end_time)
-    dt_datetime_series = pd.date_range(start=start_time, end=end_time, freq='30min')
-    # print(dt_datetime_series)
-    dt_final = pd.DataFrame(dt_datetime_series, columns=['TimeStamp'], index=dt_datetime_series)
-    dt.reset_index(drop=True, inplace=True)
-    dt_final = dt_final.merge(dt, how='outer', on=['TimeStamp'])
-    dt_final = dt_final.fillna(value=0)
+    # # print(dt)
+    # start_time = (dt.iloc[0])['TimeStamp'].date()
+    # # print(start_time)
+    # end_time = ((dt.iloc[len(dt)-1])['TimeStamp'] + pd.Timedelta(days=1)).date()
+    # # print(end_time)
+    # dt_datetime_series = pd.date_range(start=start_time, end=end_time, freq='30min')
+    # # print(dt_datetime_series)
+    # dt_final = pd.DataFrame(dt_datetime_series, columns=['TimeStamp'], index=dt_datetime_series)
+    # dt.reset_index(drop=True, inplace=True)
+    # dt_final = dt_final.merge(dt, how='outer', on=['TimeStamp'])
+    dt_final = dt.fillna(value=0)
     # print(dt_final)
     return dt_final
 
