@@ -57,9 +57,9 @@ def run_estimation(radiation_df, capacity, r_type):
     # print(dt)
 
     # Remove for 0
-    dt['Act_GHI_pred'] = dt.apply(lambda x: 0 if x['GHI_filled'] == 0 and x['DNI_filled'] == 0 else x['GHI_filled'],
+    dt['Act_GHI_pred'] = dt.apply(lambda x: 0 if x['GHI_filled'] == 0 and x['DNI_filled'] == 0 else x['Act_GHI_pred'],
                                   axis=1)
-    dt['Act_DNI_pred'] = dt.apply(lambda x: 0 if x['GHI_filled'] == 0 and x['DNI_filled'] == 0 else x['DNI_filled'],
+    dt['Act_DNI_pred'] = dt.apply(lambda x: 0 if x['GHI_filled'] == 0 and x['DNI_filled'] == 0 else x['Act_DNI_pred'],
                                   axis=1)
 
 
@@ -74,19 +74,20 @@ def run_estimation(radiation_df, capacity, r_type):
     # print(dt['Act_DNI_pred_lead'])
 
     # print(len(dt), 31177)
+    #
     # remove first line
-    dt = dt.iloc[1:]
+    dt = dt.iloc[1:-1]
     # print(len(dt), 31175)  # 31175
 
     #  get the winter month
     dt_winter = model.calc_tracking_winter(dt, scalar, half_hour=False)
-    dt_winter['prediction_final'] = dt_winter.apply(lambda x: 0 if x['GHI_filled']==0 and x['DNI_filled']==0
-                                                    else x['prediction_final'], axis=1)
+    dt_winter['predictions_final'] = dt_winter.apply(lambda x: 0 if x['GHI_filled']==0 and x['DNI_filled']==0
+                                                    else x['predictions_final'], axis=1)
     # print(dt_winter)
 
     dt_summer = model.calc_tracking_summer(dt, scalar, half_hour=False)
-    dt_summer['prediction_final'] = dt_summer.apply(lambda x: 0 if x['GHI_filled']==0 and x['DNI_filled']==0
-                                                    else x['prediction_final'], axis=1)
+    dt_summer['predictions_final'] = dt_summer.apply(lambda x: 0 if x['GHI_filled']==0 and x['DNI_filled']==0
+                                                    else x['predictions_final'], axis=1)
     # print(dt_summer)
 
     dt_all = pd.concat([dt_winter, dt_summer])
@@ -103,9 +104,9 @@ def run_estimation(radiation_df, capacity, r_type):
     # hh = hh.dropna()
     get_time_diff(hh, start_yr, end_yr)
 
-    hh['Act_GHI_pred'] = hh.apply(lambda x: 0 if x['GHI_filled'] == 0 and x['DNI_filled'] == 0 else x['GHI_filled'],
+    hh['Act_GHI_pred'] = hh.apply(lambda x: 0 if x['GHI_filled'] == 0 and x['DNI_filled'] == 0 else x['Act_GHI_pred'],
                                   axis=1)
-    hh['Act_DNI_pred'] = hh.apply(lambda x: 0 if x['GHI_filled'] == 0 and x['DNI_filled'] == 0 else x['DNI_filled'],
+    hh['Act_DNI_pred'] = hh.apply(lambda x: 0 if x['GHI_filled'] == 0 and x['DNI_filled'] == 0 else x['Act_DNI_pred'],
                                   axis=1)
     # calculate the lags and leads for the Actual_hh_predicted
     hh['Act_GHI_pred_lag'] = hh['Act_GHI_pred'].shift(1)
@@ -116,14 +117,14 @@ def run_estimation(radiation_df, capacity, r_type):
     # print(dt['Act_DNI_pred_lag'])
     hh['Act_DNI_pred_lead'] = hh['Act_DNI_pred'].shift(-1)
     # print(dt['Act_DNI_pred_lead'])
-    hh = hh.iloc[1:]
+    hh = hh.iloc[1:-1]
 
     hh_winter = model.calc_tracking_winter(hh, scalar, half_hour=True)
-    hh_winter['prediction_final'] = hh_winter.apply(lambda x: 0 if x['GHI_filled']==0 and x['DNI_filled']==0
-                                                    else x['prediction_final'], axis=1)
+    hh_winter['predictions_final'] = hh_winter.apply(lambda x: 0 if x['GHI_filled']==0 and x['DNI_filled']==0
+                                                    else x['predictions_final'], axis=1)
     hh_summer = model.calc_tracking_summer(hh, scalar, half_hour=True)
-    hh_winter['prediction_final'] = hh_winter.apply(lambda x: 0 if x['GHI_filled']==0 and x['DNI_filled']==0
-                                                    else x['prediction_final'], axis=1)
+    hh_summer['predictions_final'] = hh_summer.apply(lambda x: 0 if x['GHI_filled']==0 and x['DNI_filled']==0
+                                                    else x['predictions_final'], axis=1)
     dt_hh = pd.concat([hh_winter, hh_summer])
     # print(dt_hh)
 
