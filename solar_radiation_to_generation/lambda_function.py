@@ -32,17 +32,17 @@ def lambda_handler(event, context):
     # complete_df = combine_hourly_radiation(df_dni, df_ghi)
 
     # complete_df.to_csv('df.csv', index=False)
-    complete_df = pd.read_csv('df.csv', parse_dates=['TimeStamp'])
+    complete_df = pd.read_csv('Moree_irradiance.csv', parse_dates=['TimeStamp'])
     if generation:
         df_for_estimation = complete_df[complete_df['TimeStamp'] > estimation_start_date].copy()
         result_df = run_estimation(df_for_estimation, event['capacity']/1000, 'Tracking')
 
         result_df = result_df.drop(columns=['DNI', 'GHI'])
-        result_df = complete_df.merge(result_df, how='left', on=['TimeStamp'])
+        # result_df = complete_df.merge(result_df, how='left', on=['TimeStamp'])
 
-        grouped_df = group_data(result_df, event['resolution'], generation)
+        grouped_df = group_data(complete_df, result_df, event['resolution'], generation)
     else:
-        grouped_df = group_data(complete_df, event['resolution'], generation)
+        grouped_df = group_data(complete_df, None, event['resolution'], generation)
 
     grouped_df.to_csv('group.csv', index=False)
     # write_to_s3(result_df, event['bucket'], event['team_id'], event['email'], event['query_id'])
@@ -63,7 +63,7 @@ if __name__ == "__main__":
                     'team_id': '10',
                     'email': 'abc-test@gmail.com',
                     'resolution': 'monthly',
-                    'generation': 0,
+                    'generation': 1,
                     'capacity': 5}, 2)
 
 
