@@ -8,6 +8,7 @@ from solar_radiation_to_generation.processes.get_radiation import get_radiation_
 from solar_radiation_to_generation.processes.preprocess import combine_hourly_radiation
 from solar_radiation_to_generation.processes.estimate import run_estimation
 from solar_radiation_to_generation.processes.write_to_s3 import write_to_s3
+from solar_radiation_to_generation.processes.postprocess import scale_for_capacity
 from solar_radiation_to_generation.processes.group_data import group_data
 
 
@@ -35,11 +36,11 @@ def lambda_handler(event, context):
     complete_df = pd.read_csv('Moree_irradiance.csv', parse_dates=['TimeStamp'])
     if generation:
         df_for_estimation = complete_df[complete_df['TimeStamp'] > estimation_start_date].copy()
-        result_df = run_estimation(df_for_estimation, event['capacity']/1000, 'Tracking')
+        result_df = run_estimation(df_for_estimation, event['capacity'][0], 'Tracking', event['capacity_unit'])
 
         result_df = result_df.drop(columns=['DNI', 'GHI'])
         # result_df = complete_df.merge(result_df, how='left', on=['TimeStamp'])
-
+        result_df = scale_for_capacity(result_df, event['capacity'], event['capacity_unit'])
         grouped_df = group_data(complete_df, result_df, event['resolution'], generation)
     else:
         grouped_df = group_data(complete_df, None, event['resolution'], generation)
@@ -64,6 +65,7 @@ if __name__ == "__main__":
                     'email': 'abc-test@gmail.com',
                     'resolution': 'monthly',
                     'generation': 1,
-                    'capacity': 5}, 2)
+                    'capacity': [5,10],
+                    'capacity_unit': 'MWh'}, 2)
 
 

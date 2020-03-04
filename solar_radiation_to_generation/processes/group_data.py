@@ -21,12 +21,12 @@ def group_data(complete_df, result_df, resolution, generation):
     complete_df['WeekNo'] = complete_df['TimeStamp'].map(lambda x: x.weekofyear)
     complete_df['DNI'] = pd.to_numeric(complete_df['DNI'], errors='coerce')
     complete_df['GHI'] = pd.to_numeric(complete_df['GHI'], errors='coerce')
-    if generation:
-        result_df['Estimate generation(kW)'] = pd.to_numeric(result_df['Estimate generation(kW)'], errors='coerce')
+    # if generation:
+    #     result_df['Estimate generation(kW)'] = pd.to_numeric(result_df['Estimate generation(kW)'], errors='coerce')
 
     if resolution == 'halfhourly':
         result_df['TimeStamp'] = pd.to_datetime(result_df['TimeStamp'])
-        result_df['Year'] = result_df['TimeStamp'].map(lambda x: x.year)
+        result_df['Year'] = result_df['TimeqStamp'].map(lambda x: x.year)
         result_df['Month'] = result_df['TimeStamp'].map(lambda x: x.month)
         result_df['Day'] = result_df['TimeStamp'].map(lambda x: x.day)
         grouped_df = result_df.drop(columns=['DNI', 'GHI'])
