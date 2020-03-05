@@ -9,13 +9,13 @@ TRACKING_CAPACITY = 56
 NON_TRACKING_CAPACITY = 102
 
 
-def run_estimation(radiation_df, capacity, r_type):
+def run_estimation(radiation_df, capacity, r_type, capacity_unit):
     """
     Run the solar data estimation based on the input radiation data
 
     :param radiation_df: solar radiation dataframe
     :type radiation_df: pd.DataFrame
-    :param capacity: the searched location
+    :param capacity: generation capacity in MWh
     :type capacity: float
     :param r_type: tracking or non-tracking
     :type r_type: str
@@ -130,7 +130,8 @@ def run_estimation(radiation_df, capacity, r_type):
 
     dt = (pd.concat([dt_all, dt_hh], sort=False))
     dt = dt[['TimeStamp', 'DNI_filled', 'GHI_filled', 'predictions_final']].copy()
-    dt['predictions_final'] = dt['predictions_final'] * 1000
+    if capacity_unit == 'KWh':
+        dt['predictions_final'] = dt['predictions_final'] * 1000
     dt = dt.rename(columns={'DNI_filled': 'DNI', 'GHI_filled': 'GHI', 'predictions_final': 'Estimate generation(kW)'})
     dt = dt.sort_values(by=['TimeStamp'])
     # # print(dt)
