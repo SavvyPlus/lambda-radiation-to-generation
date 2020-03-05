@@ -33,7 +33,7 @@ def lambda_handler(event, context):
     # complete_df = combine_hourly_radiation(df_dni, df_ghi)
 
     # complete_df.to_csv('df.csv', index=False)
-    complete_df = pd.read_csv('Moree_irradiance.csv', parse_dates=['TimeStamp'])
+    complete_df = pd.read_csv('df.csv', parse_dates=['TimeStamp'])
     if generation:
         df_for_estimation = complete_df[complete_df['TimeStamp'] > estimation_start_date].copy()
         result_df = run_estimation(df_for_estimation, event['capacity'][0], 'Tracking', event['capacity_unit'])
@@ -46,7 +46,7 @@ def lambda_handler(event, context):
         grouped_df = group_data(complete_df, None, event['resolution'], generation)
 
     grouped_df.to_csv('group.csv', index=False)
-    # write_to_s3(result_df, event['bucket'], event['team_id'], event['email'], event['query_id'])
+    # write_to_s3(grouped_df, event['bucket'], event['team_id'], event['email'], event['query_id'], event['resolution'])
     print(time.time() - time1)
     return {
         'statusCode': 200,
@@ -63,9 +63,9 @@ if __name__ == "__main__":
                     'bucket': 'colin-query-test',
                     'team_id': '10',
                     'email': 'abc-test@gmail.com',
-                    'resolution': 'monthly',
+                    'resolution': 'weekly',
                     'generation': 1,
-                    'capacity': [5,10],
-                    'capacity_unit': 'MWh'}, 2)
+                    'capacity': [5, 10],
+                    'capacity_unit': 'KWh'}, 2)
 
 
