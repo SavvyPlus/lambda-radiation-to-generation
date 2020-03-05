@@ -26,7 +26,7 @@ def group_data(complete_df, result_df, resolution, generation):
 
     if resolution == 'halfhourly':
         result_df['TimeStamp'] = pd.to_datetime(result_df['TimeStamp'])
-        result_df['Year'] = result_df['TimeqStamp'].map(lambda x: x.year)
+        result_df['Year'] = result_df['TimeStamp'].map(lambda x: x.year)
         result_df['Month'] = result_df['TimeStamp'].map(lambda x: x.month)
         result_df['Day'] = result_df['TimeStamp'].map(lambda x: x.day)
         grouped_df = result_df.drop(columns=['DNI', 'GHI'])
