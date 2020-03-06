@@ -29,9 +29,10 @@ def group_data(complete_df, result_df, resolution, generation):
         result_df['Year'] = result_df['TimeStamp'].map(lambda x: x.year)
         result_df['Month'] = result_df['TimeStamp'].map(lambda x: x.month)
         result_df['Day'] = result_df['TimeStamp'].map(lambda x: x.day)
-        grouped_df = result_df.drop(columns=['DNI', 'GHI'])
+        grouped_df = result_df
     else:
-        complete_df = complete_df.merge(result_df, how='left', on=['TimeStamp'])
+        if generation:
+            complete_df = complete_df.merge(result_df, how='left', on=['TimeStamp'])
         if resolution == 'hourly':
             grouped_df = complete_df.drop(columns=['Year', 'Day', 'Month', 'WeekNo'])
         elif resolution == 'daily':
