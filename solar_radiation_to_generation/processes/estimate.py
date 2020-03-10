@@ -130,9 +130,9 @@ def run_estimation(radiation_df, capacity, r_type, capacity_unit):
 
     dt = (pd.concat([dt_all, dt_hh], sort=False))
     dt = dt[['TimeStamp', 'DNI_filled', 'GHI_filled', 'predictions_final']].copy()
-    if capacity_unit == 'KWh':
-        dt['predictions_final'] = dt['predictions_final'] * 1000
-    dt = dt.rename(columns={'DNI_filled': 'DNI', 'GHI_filled': 'GHI', 'predictions_final': 'Estimate generation(kW)'})
+    # if capacity_unit == 'KWh':
+    #     dt['predictions_final'] = dt['predictions_final'] * 1000
+    dt = dt.rename(columns={'DNI_filled': 'DNI', 'GHI_filled': 'GHI', 'predictions_final': 'Estimate generation'})
     dt = dt.sort_values(by=['TimeStamp'])
     # # print(dt)
     # start_time = (dt.iloc[0])['TimeStamp'].date()
