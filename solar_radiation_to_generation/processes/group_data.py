@@ -36,16 +36,16 @@ def group_data(complete_df, result_df, resolution, generation):
         if resolution == 'hourly':
             grouped_df = complete_df.drop(columns=['Year', 'Day', 'Month', 'WeekNo'])
         elif resolution == 'daily':
-            grouped_df = complete_df.groupby(by=['Year', 'Month', 'Day']).mean().reset_index()
+            grouped_df = complete_df.groupby(by=['Year', 'Month', 'Day']).sum().reset_index()
             grouped_df = grouped_df.drop(columns=['WeekNo'])
         elif resolution == 'weekly':
-            grouped_df = complete_df.groupby(by=['Year', 'WeekNo']).mean().reset_index()
+            grouped_df = complete_df.groupby(by=['Year', 'WeekNo']).sum().reset_index()
             grouped_df = grouped_df.drop(columns=['Day', 'Month'])
         elif resolution == 'monthly':
-            grouped_df = complete_df.groupby(by=['Year', 'Month']).mean().reset_index()
+            grouped_df = complete_df.groupby(by=['Year', 'Month']).sum().reset_index()
             grouped_df = grouped_df.drop(columns=['Day', 'WeekNo'])
         else:
-            grouped_df = complete_df.groupby(by=['Year']).mean().reset_index()
+            grouped_df = complete_df.groupby(by=['Year']).sum().reset_index()
             grouped_df = grouped_df.drop(columns=['Month', 'Day', 'WeekNo'])
 
     grouped_df = grouped_df.fillna('N/A')
