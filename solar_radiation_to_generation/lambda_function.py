@@ -40,8 +40,8 @@ def lambda_handler(event, context):
 
         result_df = result_df.drop(columns=['DNI', 'GHI'])
         # result_df = complete_df.merge(result_df, how='left', on=['TimeStamp'])
-        result_df = scale_for_capacity(result_df, event['capacity'], event['capacity_unit'])
         grouped_df = group_data(complete_df, result_df, event['resolution'], generation)
+        grouped_df = scale_for_capacity(grouped_df, event['capacity'], event['capacity_unit'])
     else:
         grouped_df = group_data(complete_df, None, event['resolution'], generation)
 
