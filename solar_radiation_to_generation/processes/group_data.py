@@ -32,6 +32,7 @@ def group_data(complete_df, result_df, resolution, generation):
         grouped_df = result_df
     else:
         if generation:
+            result_df['Estimate generation'] = result_df['Estimate generation']/2
             complete_df = complete_df.merge(result_df, how='left', on=['TimeStamp'])
         if resolution == 'hourly':
             grouped_df = complete_df.drop(columns=['Year', 'Day', 'Month', 'WeekNo'])
