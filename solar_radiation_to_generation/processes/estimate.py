@@ -9,7 +9,7 @@ TRACKING_CAPACITY = 56
 NON_TRACKING_CAPACITY = 102
 
 
-def run_estimation(radiation_df, capacity, r_type, capacity_unit):
+def run_estimation(radiation_df, capacity, r_type, generation=False, start_date=None):
     """
     Run the solar data estimation based on the input radiation data
 
@@ -35,6 +35,15 @@ def run_estimation(radiation_df, capacity, r_type, capacity_unit):
     # print(start_yr, end_yr)
     calc_missing(dt, 'GHI')
     calc_missing(dt, 'DNI')
+
+    if not generation:
+        return dt[['TimeStamp','DNI_filled','GHI_filled']].rename(columns={'DNI_filled':'DNI','GHI_filled':'GHI'})
+
+    dt_full = dt.drop(columns=['index'])[['TimeStamp','DNI_filled','GHI_filled']].rename(columns={'DNI_filled':'DNI','GHI_filled':'GHI'})
+
+    dt = dt[dt['TimeStamp'] > start_date]
+
+
     model = tracking if tracking_type == 'Tracking' else nontracking
     # load prediction csv
     ghi_predict = model.load_predict_csv('GHI')
@@ -76,7 +85,7 @@ def run_estimation(radiation_df, capacity, r_type, capacity_unit):
     # print(len(dt), 31177)
     #
     # remove first line
-    dt = dt.iloc[1:-1]
+    # dt = dt.iloc[1:-1]
     # print(len(dt), 31175)  # 31175
 
     #  get the winter month
@@ -117,7 +126,7 @@ def run_estimation(radiation_df, capacity, r_type, capacity_unit):
     # print(dt['Act_DNI_pred_lag'])
     hh['Act_DNI_pred_lead'] = hh['Act_DNI_pred'].shift(-1)
     # print(dt['Act_DNI_pred_lead'])
-    hh = hh.iloc[1:-1]
+    # hh = hh.iloc[1:-1]
 
     hh_winter = model.calc_tracking_winter(hh, scalar, half_hour=True)
     hh_winter['predictions_final'] = hh_winter.apply(lambda x: 0 if x['GHI_filled']==0 and x['DNI_filled']==0
@@ -129,10 +138,10 @@ def run_estimation(radiation_df, capacity, r_type, capacity_unit):
     # print(dt_hh)
 
     dt = (pd.concat([dt_all, dt_hh], sort=False))
-    dt = dt[['TimeStamp', 'DNI_filled', 'GHI_filled', 'predictions_final']].copy()
+    dt = dt[['TimeStamp','DNI_filled', 'GHI_filled', 'predictions_final']].copy()
     # if capacity_unit == 'KWh':
     #     dt['predictions_final'] = dt['predictions_final'] * 1000
-    dt = dt.rename(columns={'DNI_filled': 'DNI', 'GHI_filled': 'GHI', 'predictions_final': 'Estimate generation'})
+    dt = dt.rename(columns={'DNI_filled':'DNI', 'GHI_filled':'GHI', 'predictions_final': 'Estimate generation'})
     dt = dt.sort_values(by=['TimeStamp'])
     # # print(dt)
     # start_time = (dt.iloc[0])['TimeStamp'].date()
@@ -143,8 +152,11 @@ def run_estimation(radiation_df, capacity, r_type, capacity_unit):
     # # print(dt_datetime_series)
     # dt_final = pd.DataFrame(dt_datetime_series, columns=['TimeStamp'], index=dt_datetime_series)
     # dt.reset_index(drop=True, inplace=True)
-    # dt_final = dt_final.merge(dt, how='outer', on=['TimeStamp'])
-    dt_final = dt.fillna(value=0)
+    dt_final = dt_full.merge(dt, how='outer', on=['TimeStamp'], suffixes=('','_y'))
+    dt_final['DNI'] = dt_final.apply(lambda x: x['DNI'] if not math.isnan(x['DNI']) else x['DNI_y'], axis=1)
+    dt_final['GHI'] = dt_final.apply(lambda x: x['GHI'] if not math.isnan(x['GHI']) else x['GHI_y'], axis=1)
+    dt_final = dt_final.drop(columns=['DNI_y', 'GHI_y'])
+    dt_final = dt_final.fillna(value=0)
     # print(dt_final)
     return dt_final
 

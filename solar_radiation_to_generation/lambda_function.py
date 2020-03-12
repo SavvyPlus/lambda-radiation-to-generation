@@ -29,21 +29,22 @@ def lambda_handler(event, context):
 
     generation = True if event['generation'] == 1 else 0
 
-    # df_dni, df_ghi = get_radiation_data(lat, lng, start_date, end_date)
-    # complete_df = combine_hourly_radiation(df_dni, df_ghi)
+    df_dni, df_ghi = get_radiation_data(lat, lng, start_date, end_date)
+    # df_dni = pd.read_csv('dni.csv', parse_dates=['TimeStamp'])
+    # df_ghi = pd.read_csv('ghi.csv', parse_dates=['TimeStamp'])
+    complete_df = combine_hourly_radiation(df_dni, df_ghi)
 
     # complete_df.to_csv('df.csv', index=False)
-    complete_df = pd.read_csv('Moree_irradiance.csv', parse_dates=['TimeStamp'])
-    if generation:
-        df_for_estimation = complete_df[complete_df['TimeStamp'] > estimation_start_date].copy()
-        result_df = run_estimation(df_for_estimation, event['capacity'][0], 'Tracking', event['capacity_unit'])
+    # complete_df = pd.read_csv('dni.csv', parse_dates=['TimeStamp'])
+    # df_for_estimation = complete_df[complete_df['TimeStamp'] > estimation_start_date].copy()
+    # df_for_estimation = pd.read_csv('df_for_estimation.csv', parse_dates=['TimeStamp'])
+    result_df = run_estimation(complete_df, event['capacity'][0], 'Non-tracking', generation, estimation_start_date)
 
-        result_df = result_df.drop(columns=['DNI', 'GHI'])
-        # result_df = complete_df.merge(result_df, how='left', on=['TimeStamp'])
-        grouped_df = group_data(complete_df, result_df, event['resolution'], generation)
+    # result_df = result_df.drop(columns=['DNI', 'GHI'])
+    # result_df = complete_df.merge(result_df, how='left', on=['TimeStamp'])
+    grouped_df = group_data(result_df, event['resolution'], generation)
+    if generation:
         grouped_df = scale_for_capacity(grouped_df, event['capacity'], event['capacity_unit'])
-    else:
-        grouped_df = group_data(complete_df, None, event['resolution'], generation)
 
     grouped_df.to_csv('group.csv', index=False)
     # write_to_s3(result_df, event['bucket'], event['team_id'], event['email'], event['query_id'])

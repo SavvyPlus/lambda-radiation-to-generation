@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def group_data(complete_df, result_df, resolution, generation):
+def group_data(complete_df, resolution, generation):
     """
     Group the raw solar radiation data based on the input resolution.
     In the output dataframe, all generation will be converted to numeric
@@ -18,6 +18,7 @@ def group_data(complete_df, result_df, resolution, generation):
     complete_df['Year'] = complete_df['TimeStamp'].map(lambda x: x.year)
     complete_df['Month'] = complete_df['TimeStamp'].map(lambda x: x.month)
     complete_df['Day'] = complete_df['TimeStamp'].map(lambda x: x.day)
+    complete_df['Hour'] = complete_df['TimeStamp'].map(lambda x: x.hour)
     complete_df['WeekNo'] = complete_df['TimeStamp'].map(lambda x: x.weekofyear)
     complete_df['DNI'] = pd.to_numeric(complete_df['DNI'], errors='coerce')
     complete_df['GHI'] = pd.to_numeric(complete_df['GHI'], errors='coerce')
@@ -25,29 +26,29 @@ def group_data(complete_df, result_df, resolution, generation):
     #     result_df['Estimate generation(kW)'] = pd.to_numeric(result_df['Estimate generation(kW)'], errors='coerce')
 
     if resolution == 'halfhourly':
-        result_df['TimeStamp'] = pd.to_datetime(result_df['TimeStamp'])
-        result_df['Year'] = result_df['TimeqStamp'].map(lambda x: x.year)
-        result_df['Month'] = result_df['TimeStamp'].map(lambda x: x.month)
-        result_df['Day'] = result_df['TimeStamp'].map(lambda x: x.day)
-        grouped_df = result_df
+        generation_column = complete_df['Estimate generation']
+        complete_df = complete_df.drop(columns=['WeekNo', 'DNI', 'GHI', 'Hour', 'Estimate generation'])
+        grouped_df = complete_df
+        grouped_df['Estimate generation'] = generation_column
+        grouped_df = grouped_df.sort_values(by=['TimeStamp'])
     else:
         if generation:
-            result_df['Estimate generation'] = result_df['Estimate generation']/2
-            complete_df = complete_df.merge(result_df, how='left', on=['TimeStamp'])
+            complete_df['Estimate generation'] = complete_df['Estimate generation']/2
         if resolution == 'hourly':
-            grouped_df = complete_df.drop(columns=['Year', 'Day', 'Month', 'WeekNo'])
+            grouped_df = complete_df.groupby(by=['Year', 'Month', 'Day', 'Hour']).sum().reset_index()
+            grouped_df = grouped_df.drop(columns=['Year', 'Day', 'Month', 'WeekNo', 'Hour'])
         elif resolution == 'daily':
             grouped_df = complete_df.groupby(by=['Year', 'Month', 'Day']).sum().reset_index()
-            grouped_df = grouped_df.drop(columns=['WeekNo'])
+            grouped_df = grouped_df.drop(columns=['WeekNo', 'Hour'])
         elif resolution == 'weekly':
             grouped_df = complete_df.groupby(by=['Year', 'WeekNo']).sum().reset_index()
-            grouped_df = grouped_df.drop(columns=['Day', 'Month'])
+            grouped_df = grouped_df.drop(columns=['Day', 'Month', 'Hour'])
         elif resolution == 'monthly':
             grouped_df = complete_df.groupby(by=['Year', 'Month']).sum().reset_index()
-            grouped_df = grouped_df.drop(columns=['Day', 'WeekNo'])
+            grouped_df = grouped_df.drop(columns=['Day', 'WeekNo', 'Hour'])
         else:
             grouped_df = complete_df.groupby(by=['Year']).sum().reset_index()
-            grouped_df = grouped_df.drop(columns=['Month', 'Day', 'WeekNo'])
+            grouped_df = grouped_df.drop(columns=['Month', 'Day', 'WeekNo', 'Hour'])
 
     grouped_df = grouped_df.fillna('N/A')
     # Reverse the whole data order so users won't see 'N/A' generation at the beginning
