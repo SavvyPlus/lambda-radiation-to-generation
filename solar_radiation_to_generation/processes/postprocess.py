@@ -2,7 +2,7 @@ import pandas as pd
 
 
 def scale_for_capacity(result_df, capacity_list, capacity_unit):
-    generation_column_header = result_df.columns[-1]
+    generation_column_header = 'Estimate generation'
     generation_column = result_df[generation_column_header]
     result_df = result_df.drop(columns=[generation_column_header])
     # scaler = 1 if capacity_unit=='MWh' else 1000
