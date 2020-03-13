@@ -283,8 +283,8 @@ def half_hourly_data(df):
     half_hour = df[['TimeStamp', 'month', 'day', 'year', 'DNI_filled', 'GHI_filled']].copy()
     half_hour['TimeStamp'] = half_hour['TimeStamp'].map(lambda x: x + datetime.timedelta(hours=0.5))
     for i in range(0, len(half_hour)-1):
-        half_hour.loc[i, 'DNI_filled'] = round((half_hour.loc[i, 'DNI_filled'] + half_hour.loc[i + 1, 'DNI_filled']) / 2, 0)
-        half_hour.loc[i, 'GHI_filled'] = round((half_hour.loc[i, 'GHI_filled'] + half_hour.loc[i + 1, 'GHI_filled']) / 2, 0)
+        half_hour.iloc[i]['DNI_filled'] = round((half_hour.iloc[i]['DNI_filled'] + half_hour.iloc[i + 1]['DNI_filled']) / 2, 0)
+        half_hour.iloc[i]['GHI_filled'] = round((half_hour.iloc[i]['GHI_filled'] + half_hour.iloc[i + 1]['GHI_filled']) / 2, 0)
     # print(half_hour)
     half_hour['hour_diff'] = half_hour['TimeStamp'].map(lambda x: abs(x.hour - 12))
     return half_hour
