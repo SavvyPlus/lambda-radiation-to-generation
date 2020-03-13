@@ -75,24 +75,18 @@ def calc_pred_generation(row, model_data):
 
 
 def load_predict_csv(r_type):
-    # client = boto3.client('s3')
-    # if r_type == 'GHI':
-    #     file_obj = client.get_object(
-    #         Bucket='solar-radiation',
-    #         Key='solar-radiation-to-generation/NonTrackingModel/combined_GHI_median_function_final.csv'
-    #     )
-    # else:
-    #     file_obj = client.get_object(
-    #         Bucket='solar-radiation',
-    #         Key='solar-radiation-to-generation/NonTrackingModel/predictions_DNI.csv'
-    #     )
-    # dataframe = pd.read_csv(io.BytesIO(file_obj['Body'].read()))
+    client = boto3.client('s3')
     if r_type == 'GHI':
-
-        dataframe = pd.read_csv('/home/eric/projects/lambda-radiation-to-generation/solar_radiation_to_generation/processes/NonTrackingModel/combined_GHI_median_function_final.csv')
+        file_obj = client.get_object(
+            Bucket='solar-radiation',
+            Key='solar-radiation-to-generation/NonTrackingModel/combined_GHI_median_function_final.csv'
+        )
     else:
-        dataframe = pd.read_csv('/home/eric/projects/lambda-radiation-to-generation/solar_radiation_to_generation/processes/NonTrackingModel/predictions_DNI.csv')
-
+        file_obj = client.get_object(
+            Bucket='solar-radiation',
+            Key='solar-radiation-to-generation/NonTrackingModel/predictions_DNI.csv'
+        )
+    dataframe = pd.read_csv(io.BytesIO(file_obj['Body'].read()))
     dataframe.rename(columns={'Irr_Num_seq': 'Irradiance'}, inplace=True)
     return dataframe
 

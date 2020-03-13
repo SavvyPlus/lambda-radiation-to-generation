@@ -29,16 +29,14 @@ def lambda_handler(event, context):
 
     generation = True if event['generation'] == 1 else False
 
-    df_dni, df_ghi = get_radiation_data(lat, lng, start_date, end_date)
-    # df_dni = pd.read_csv('dni.csv', parse_dates=['TimeStamp'])
-    # df_ghi = pd.read_csv('ghi.csv', parse_dates=['TimeStamp'])
-    complete_df = combine_hourly_radiation(df_dni, df_ghi)
+    # df_dni, df_ghi = get_radiation_data(lat, lng, start_date, end_date)
+    # complete_df = combine_hourly_radiation(df_dni, df_ghi)
 
     # complete_df.to_csv('df.csv', index=False)
-    # complete_df = pd.read_csv('dni.csv', parse_dates=['TimeStamp'])
+    complete_df = pd.read_csv('df.csv', parse_dates=['TimeStamp'])
     # df_for_estimation = complete_df[complete_df['TimeStamp'] > estimation_start_date].copy()
     # df_for_estimation = pd.read_csv('df_for_estimation.csv', parse_dates=['TimeStamp'])
-    result_df = run_estimation(complete_df, event['capacity'][0], 'Non-tracking', generation, estimation_start_date)
+    result_df = run_estimation(complete_df, event['capacity'][0], 'Tracking', generation, estimation_start_date)
 
     # result_df = result_df.drop(columns=['DNI', 'GHI'])
     # result_df = complete_df.merge(result_df, how='left', on=['TimeStamp'])
@@ -46,7 +44,7 @@ def lambda_handler(event, context):
     if generation:
         grouped_df = scale_for_capacity(grouped_df, event['capacity'], event['capacity_unit'])
 
-    grouped_df.to_csv('group.csv', index=False)
+    grouped_df.to_csv('group_daily.csv', index=False)
     # write_to_s3(grouped_df, event['bucket'], event['team_id'], event['email'], event['query_id'], event['resolution'])
     print(time.time() - time1)
     return {
@@ -64,9 +62,9 @@ if __name__ == "__main__":
                     'bucket': 'colin-query-test',
                     'team_id': '10',
                     'email': 'abc-test@gmail.com',
-                    'resolution': 'weekly',
+                    'resolution': 'daily',
                     'generation': 1,
-                    'capacity': [5, 10],
+                    'capacity': [1, 2],
                     'capacity_unit': 'KWh'}, 2)
 
 
