@@ -27,13 +27,12 @@ def group_data(complete_df, resolution, generation):
 
     if resolution == 'halfhourly':
         generation_column = complete_df['Estimate generation']
-        complete_df = complete_df.drop(columns=['WeekNo', 'DNI', 'GHI', 'Hour', 'Estimate generation'])
-        grouped_df = complete_df
-        grouped_df['Estimate generation'] = generation_column/2
+        grouped_df = complete_df.drop(columns=['WeekNo', 'DNI', 'GHI', 'Hour', 'Estimate generation'])
+        grouped_df['Estimate generation'] = generation_column
         grouped_df = grouped_df.sort_values(by=['TimeStamp'])
     else:
-        if generation:
-            complete_df['Estimate generation'] = complete_df['Estimate generation']/2
+        # if generation:
+        #     complete_df['Estimate generation'] = complete_df['Estimate generation']/2
         if resolution == 'hourly':
             grouped_df = complete_df.groupby(by=['Year', 'Month', 'Day', 'Hour']).sum().reset_index()
             grouped_df = grouped_df.drop(columns=['Year', 'Day', 'Month', 'WeekNo', 'Hour'])
