@@ -156,7 +156,7 @@ def run_estimation(radiation_df, capacity, r_type, generation=False, start_date=
     dt_final['DNI'] = dt_final.apply(lambda x: x['DNI'] if not math.isnan(x['DNI']) else x['DNI_y'], axis=1)
     dt_final['GHI'] = dt_final.apply(lambda x: x['GHI'] if not math.isnan(x['GHI']) else x['GHI_y'], axis=1)
     dt_final = dt_final.drop(columns=['DNI_y', 'GHI_y'])
-    dt_final = dt_final.fillna(value=0)
+    dt_final = dt_final.fillna('N/A')
     # print(dt_final)
     return dt_final
 

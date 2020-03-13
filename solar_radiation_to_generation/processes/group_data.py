@@ -29,7 +29,7 @@ def group_data(complete_df, resolution, generation):
         generation_column = complete_df['Estimate generation']
         complete_df = complete_df.drop(columns=['WeekNo', 'DNI', 'GHI', 'Hour', 'Estimate generation'])
         grouped_df = complete_df
-        grouped_df['Estimate generation'] = generation_column
+        grouped_df['Estimate generation'] = generation_column/2
         grouped_df = grouped_df.sort_values(by=['TimeStamp'])
     else:
         if generation:
