@@ -75,18 +75,22 @@ def calc_pred_generation(row, model_data):
 
 
 def load_predict_csv(r_type):
-    client = boto3.client('s3')
+    # client = boto3.client('s3')
+    # if r_type == 'GHI':
+    #     file_obj = client.get_object(
+    #         Bucket='solar-radiation',
+    #         Key='solar-radiation-to-generation/TrackingModel/predictions_GHI_5minv2.csv'
+    #     )
+    # else:
+    #     file_obj = client.get_object(
+    #         Bucket='solar-radiation',
+    #         Key='solar-radiation-to-generation/TrackingModel/predictions_DNI_5min_final.csv'
+    #     )
     if r_type == 'GHI':
-        file_obj = client.get_object(
-            Bucket='solar-radiation',
-            Key='solar-radiation-to-generation/TrackingModel/predictions_GHI_5minv2.csv'
-        )
+
+        dataframe = pd.read_csv('/home/eric/projects/lambda-radiation-to-generation/solar_radiation_to_generation/processes/TrackingModel/predictions_GHI_5minv2.csv')
     else:
-        file_obj = client.get_object(
-            Bucket='solar-radiation',
-            Key='solar-radiation-to-generation/TrackingModel/predictions_DNI_5min_final.csv'
-        )
-    dataframe = pd.read_csv(io.BytesIO(file_obj['Body'].read()))
+        dataframe = pd.read_csv('/home/eric/projects/lambda-radiation-to-generation/solar_radiation_to_generation/processes/TrackingModel/predictions_DNI_5min_final.csv')
     dataframe.rename(columns={'Irr_Num_seq': 'Irradiance'}, inplace=True)
     return dataframe
 
@@ -94,7 +98,7 @@ def load_predict_csv(r_type):
 def calc_tracking_winter(df, scaler, half_hour):
     df_winter = df[df.month.isin(WINTER)]
     # print(len(df_winter), 13590)  # 13590
-    df_winter = df_winter.dropna()
+    df_winter = df_winter.fillna(0)
 
     max_generation = TRACKING_CAPACITY * scaler
     model = TrackingWinterHalfHour() if half_hour else TrackingWinterHour()
@@ -125,7 +129,7 @@ def calc_tracking_winter(df, scaler, half_hour):
 def calc_tracking_summer(df, scalar, half_hour):
     df_summer = df[df.month.isin(SUMMER)]
     # print(len(df_summer), 13590)  # 13590
-    df_summer = df_summer.dropna()
+    df_summer = df_summer.fillna(0)
     max_generation = TRACKING_CAPACITY * scalar
     model = TrackingSummerHalfHour() if half_hour else TrackingSummerHour()
 

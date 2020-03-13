@@ -75,18 +75,24 @@ def calc_pred_generation(row, model_data):
 
 
 def load_predict_csv(r_type):
-    client = boto3.client('s3')
+    # client = boto3.client('s3')
+    # if r_type == 'GHI':
+    #     file_obj = client.get_object(
+    #         Bucket='solar-radiation',
+    #         Key='solar-radiation-to-generation/NonTrackingModel/combined_GHI_median_function_final.csv'
+    #     )
+    # else:
+    #     file_obj = client.get_object(
+    #         Bucket='solar-radiation',
+    #         Key='solar-radiation-to-generation/NonTrackingModel/predictions_DNI.csv'
+    #     )
+    # dataframe = pd.read_csv(io.BytesIO(file_obj['Body'].read()))
     if r_type == 'GHI':
-        file_obj = client.get_object(
-            Bucket='solar-radiation',
-            Key='solar-radiation-to-generation/NonTrackingModel/combined_GHI_median_function_final.csv'
-        )
+
+        dataframe = pd.read_csv('/home/eric/projects/lambda-radiation-to-generation/solar_radiation_to_generation/processes/NonTrackingModel/combined_GHI_median_function_final.csv')
     else:
-        file_obj = client.get_object(
-            Bucket='solar-radiation',
-            Key='solar-radiation-to-generation/NonTrackingModel/predictions_DNI.csv'
-        )
-    dataframe = pd.read_csv(io.BytesIO(file_obj['Body'].read()))
+        dataframe = pd.read_csv('/home/eric/projects/lambda-radiation-to-generation/solar_radiation_to_generation/processes/NonTrackingModel/predictions_DNI.csv')
+
     dataframe.rename(columns={'Irr_Num_seq': 'Irradiance'}, inplace=True)
     return dataframe
 
@@ -94,7 +100,7 @@ def load_predict_csv(r_type):
 def calc_tracking_winter(df, scalar, half_hour):
     df_winter = df[df.month.isin(WINTER)]
     # print(len(df_winter), 13590)  # 13590
-    df_winter = df_winter.dropna()
+    df_winter = df_winter.fillna(0)
 
     max_generation = NON_TRACKING_CAPACITY * scalar
     model = NonTrackingWinterHalfHour() if half_hour else NonTrackingWinterHour()
@@ -125,7 +131,7 @@ def calc_tracking_winter(df, scalar, half_hour):
 def calc_tracking_summer(df, scalar, half_hour):
     df_summer = df[df.month.isin(SUMMER)]
     # print(len(df_summer), 13590)  # 13590
-    df_summer = df_summer.dropna()
+    df_summer = df_summer.fillna(0)
     max_generation = NON_TRACKING_CAPACITY * scalar
     # print('max: ', max_generation)
     model = NonTrackingSummerHalfHour() if half_hour else NonTrackingSummerHour()
