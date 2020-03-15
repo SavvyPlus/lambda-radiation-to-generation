@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def group_data(complete_df, resolution, generation, start_date ):
+def group_data(complete_df, resolution, generation, start_date):
     """
     Group the raw solar radiation data based on the input resolution.
     In the output dataframe, all generation will be converted to numeric
@@ -61,7 +61,8 @@ def group_data(complete_df, resolution, generation, start_date ):
             grouped_df['Estimate generation'] = grouped_df.apply(lambda x: 'N/A' if x['Year']<start_date.year
                                                     else x['Estimate generation'], axis=1)
 
-    grouped_df = grouped_df.fillna('N/A')
+    # grouped_df = grouped_df.fillna('N/A')
+    grouped_df['Estimate generation'] = grouped_df['Estimate generation'].replace(0.0, 'N/A')
     # Reverse the whole data order so users won't see 'N/A' generation at the beginning
     grouped_df = grouped_df.iloc[::-1]
     return grouped_df
