@@ -40,11 +40,11 @@ def lambda_handler(event, context):
 
     # result_df = result_df.drop(columns=['DNI', 'GHI'])
     # result_df = complete_df.merge(result_df, how='left', on=['TimeStamp'])
-    grouped_df = group_data(result_df, event['resolution'], generation, start_date)
+    grouped_df = group_data(result_df, event['resolution'], generation, estimation_start_date)
     if generation:
         grouped_df = scale_for_capacity(grouped_df, event['capacity'], event['capacity_unit'])
 
-    grouped_df.to_csv('group_daily.csv', index=False)
+    grouped_df.to_csv('group.csv', index=False)
     # write_to_s3(grouped_df, event['bucket'], event['team_id'], event['email'], event['query_id'], event['resolution'])
     print(time.time() - time1)
     return {
@@ -62,7 +62,7 @@ if __name__ == "__main__":
                     'bucket': 'colin-query-test',
                     'team_id': '10',
                     'email': 'abc-test@gmail.com',
-                    'resolution': 'daily',
+                    'resolution': 'weekly',
                     'generation': 1,
                     'capacity': [1, 2],
                     'capacity_unit': 'KWh'}, 2)
