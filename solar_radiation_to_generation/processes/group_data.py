@@ -40,7 +40,7 @@ def group_data(complete_df, resolution, generation, start_date ):
                                                         or (x['Year']==start_date.year and x['Month']<start_date.month)
                                                         or (x['Year']==start_date.year and x['Month']==start_date.month and x['Day'] < start_date.day)
                                                         else x['Estimate generation'], axis=1)
-            grouped_df = grouped_df.drop(columns=['Year', 'Day', 'Month', 'WeekNo', 'Hour'])
+            grouped_df = grouped_df.drop(columns=['WeekNo'])
         elif resolution == 'daily':
             grouped_df = complete_df.groupby(by=['Year', 'Month', 'Day']).sum().reset_index()
             grouped_df = grouped_df.drop(columns=['WeekNo', 'Hour'])
