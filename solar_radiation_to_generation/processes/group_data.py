@@ -35,31 +35,41 @@ def group_data(complete_df, resolution, generation, start_date ):
         #     complete_df['Estimate generation'] = complete_df['Estimate generation']/2
         if resolution == 'hourly':
             grouped_df = complete_df.groupby(by=['Year', 'Month', 'Day', 'Hour']).sum().reset_index()
+            if generation:
+                grouped_df['Estimate generation'] = grouped_df.apply(lambda x: 'N/A' if x['Year']<start_date.year
+                                                        or (x['Year']==start_date.year and x['Month']<start_date.month)
+                                                        or (x['Year']==start_date.year and x['Month']==start_date.month and x['Day'] < start_date.day)
+                                                        else x['Estimate generation'], axis=1)
             grouped_df = grouped_df.drop(columns=['Year', 'Day', 'Month', 'WeekNo', 'Hour'])
         elif resolution == 'daily':
             grouped_df = complete_df.groupby(by=['Year', 'Month', 'Day']).sum().reset_index()
             grouped_df = grouped_df.drop(columns=['WeekNo', 'Hour'])
-            grouped_df['Estimate generation'] = grouped_df.apply(lambda x: 'N/A' if x['Year']<start_date.year
-                                                    or (x['Year']==start_date.year and x['Month']<start_date.month)
-                                                    or (x['Year']==start_date.year and x['Month']==start_date.month and x['Day'] < start_date.day)
-                                                    else x['Estimate generation'], axis=1)
+            if generation:
+                grouped_df['Estimate generation'] = grouped_df.apply(lambda x: 'N/A' if x['Year']<start_date.year
+                                                        or (x['Year']==start_date.year and x['Month']<start_date.month)
+                                                        or (x['Year']==start_date.year and x['Month']==start_date.month and x['Day'] < start_date.day)
+                                                        else x['Estimate generation'], axis=1)
         elif resolution == 'weekly':
             grouped_df = complete_df.groupby(by=['Year', 'WeekNo']).sum().reset_index()
-            grouped_df['Estimate generation'] = grouped_df.apply(lambda x: 'N/A' if x['Year']<start_date.year
-                                                    or (x['Year']==start_date.year and x['WeekNo']<pd.Timestamp(start_date).weekofyear)
-                                                    else x['Estimate generation'], axis=1)
+            if generation:
+                grouped_df['Estimate generation'] = grouped_df.apply(lambda x: 'N/A' if x['Year']<start_date.year
+                                                        or (x['Year']==start_date.year and x['WeekNo']<pd.Timestamp(start_date).weekofyear)
+                                                        else x['Estimate generation'], axis=1)
             grouped_df = grouped_df.drop(columns=['Day', 'Month', 'Hour'])
         elif resolution == 'monthly':
             grouped_df = complete_df.groupby(by=['Year', 'Month']).sum().reset_index()
+
+            if generation:
+                grouped_df['Estimate generation'] = grouped_df.apply(lambda x: 'N/A' if x['Year']<start_date.year
+                                                        or (x['Year']==start_date.year and x['Month']<start_date.month)
+                                                        else x['Estimate generation'], axis=1)
             grouped_df = grouped_df.drop(columns=['Day', 'WeekNo', 'Hour'])
-            grouped_df['Estimate generation'] = grouped_df.apply(lambda x: 'N/A' if x['Year']<start_date.year
-                                                    or (x['Year']==start_date.year and x['Month']<start_date.month)
-                                                    else x['Estimate generation'], axis=1)
         else:
             grouped_df = complete_df.groupby(by=['Year']).sum().reset_index()
+            if generation:
+                grouped_df['Estimate generation'] = grouped_df.apply(lambda x: 'N/A' if x['Year']<start_date.year
+                                                        else x['Estimate generation'], axis=1)
             grouped_df = grouped_df.drop(columns=['Month', 'Day', 'WeekNo', 'Hour'])
-            grouped_df['Estimate generation'] = grouped_df.apply(lambda x: 'N/A' if x['Year']<start_date.year
-                                                    else x['Estimate generation'], axis=1)
 
     grouped_df = grouped_df.fillna('N/A')
     # Reverse the whole data order so users won't see 'N/A' generation at the beginning
