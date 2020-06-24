@@ -214,6 +214,7 @@ def calc_missing(df, r_type):
                     break
             for k in range(1, count):
                 df.loc[i+k-1, column_name] = round(start + k*avg, 0)
+    df[column_name] = df.apply(lambda x: 0 if x['hour_diff'] >=7 else x[column_name], axis=1)
 
 
 def compute_predict(df, predict, r_type):
